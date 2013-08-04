@@ -209,7 +209,7 @@ int addresscheck(volatile int *base,int cachesize)
 	{
 		if((aliases&0x2000000)==0)	// If the alias bits aren't contiguously the high bits, then it indicates a bad address.
 			result=0;
-		aliases=(aliases<<1)&0xffffff;	// Test currently supports up to 16m longwords = 64 megabytes.
+		aliases=(aliases<<1)&0x3ffffff;	// Test currently supports up to 16m longwords = 64 megabytes.
 		size>>=1;
 	}
 	if(result && (size<64))
