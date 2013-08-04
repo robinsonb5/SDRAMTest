@@ -9,7 +9,6 @@ entity SDRAMTest is
 		sdram_rows : integer := 12;
 		sdram_cols : integer := 8;
 		sysclk_frequency : integer := 1000; -- Sysclk frequency * 10
-		spi_maxspeed : integer := 4;	-- lowest acceptable timer DIV7 value
 		run_from_ram : boolean := true -- Do we need to run code from SDRAM
 	);
 	port (
@@ -138,17 +137,6 @@ mysdram : entity work.sdram
 		reset => reset_in,  -- Contributes to reset, so have to use reset_in here.
 		reset_out => sdr_ready,
 
---		vga_addr => vga_addr,
---		vga_data => vga_data,
---		vga_fill => vga_fill,
---		vga_req => vga_req,
---		vga_ack => vga_ack,
---		vga_refresh => vga_refresh,
---		vga_reservebank => vga_reservebank,
---		vga_reserveaddr => vga_reserveaddr,
---
---		vga_newframe => vga_newframe,
-
 		datawr1 => sdram_write,
 		Addr1 => sdram_addr,
 		req1 => sdram_req,
@@ -237,7 +225,6 @@ end process;
 		out_mem_hEnable     => mem_writeEnableh,
 		out_mem_bEnable     => mem_writeEnableb,
 		out_mem_readEnable  => mem_readEnable,
---		mem_writeMask       => mem_writeMask,
 		interrupt           => zpu_interrupt,
 		break               => zpu_break,
 		from_rom => zpu_from_rom,
