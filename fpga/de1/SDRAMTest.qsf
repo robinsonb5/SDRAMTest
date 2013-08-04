@@ -531,7 +531,7 @@ set_location_assignment PIN_W20 -to SD_DAT
 set_location_assignment PIN_U20 -to SD_DAT3
 set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
 set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "USE AS REGULAR IO"
-set_global_assignment -name CYCLONEII_OPTIMIZATION_TECHNIQUE AREA
+set_global_assignment -name CYCLONEII_OPTIMIZATION_TECHNIQUE BALANCED
 set_global_assignment -name SYNTH_TIMING_DRIVEN_SYNTHESIS OFF
 set_global_assignment -name REMOVE_REDUNDANT_LOGIC_CELLS ON
 set_global_assignment -name MUX_RESTRUCTURE ON
@@ -541,14 +541,12 @@ set_global_assignment -name PHYSICAL_SYNTHESIS_MAP_LOGIC_TO_MEMORY_FOR_AREA ON
 set_global_assignment -name VHDL_FILE ../../ZPUFlex/RTL/zpupkg.vhd
 set_global_assignment -name VHDL_FILE ../../ZPUFlex/RTL/zpu_core_flex.vhd
 set_global_assignment -name VHDL_FILE ../../ZPUFlex/RTL/zpu_config.vhd
-set_global_assignment -name QIP_FILE ../../GeneratedRTL/CacheBlockRAM.qip
-set_global_assignment -name QIP_FILE ../../GeneratedRTL/Cache_DataRAM.qip
 set_global_assignment -name VHDL_FILE ../../fw/SDRAMTest_ROM.vhd
-set_global_assignment -name VERILOG_FILE ../../RTL/TwoWayCache.v
 set_global_assignment -name VHDL_FILE ../../RTL/simple_uart.vhd
 set_global_assignment -name VHDL_FILE ../../RTL/sdram.vhd
 set_global_assignment -name QIP_FILE PLL.qip
 set_global_assignment -name VERILOG_FILE DE1_Toplevel.v
 set_global_assignment -name VHDL_FILE ../../RTL/SDRAMTest.vhd
 set_global_assignment -name SLD_FILE /home/amr/FPGA/Projects/SDRAMTest/fpga/de1/stp1_auto_stripped.stp
+set_global_assignment -name SDC_FILE SDRAMTest.sdc
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

@@ -182,6 +182,11 @@ assign	GPIO_1		=	36'hzzzzzzzzz;
 wire sysclk;
 wire pll_locked;
 
+reg reset;
+
+always @(posedge sysclk)
+	reset<=!SW[0]^KEY[0];
+
 PLL mypll
 (
 	.inclk0(CLOCK_50),
@@ -193,13 +198,12 @@ PLL mypll
 defparam mySDRAMTest.sdram_rows = 12;
 defparam mySDRAMTest.sdram_cols = 8;
 defparam mySDRAMTest.sysclk_frequency = 1250;
-defparam mySDRAMTest.spi_maxspeed = 4;
 defparam mySDRAMTest.run_from_ram = "false";
 
 SDRAMTest mySDRAMTest
 (	
 	.clk(sysclk),
-	.reset_in((!SW[0]^KEY[0])&pll_locked),
+	.reset_in(reset&pll_locked),
 	
 	// sdram
 	.sdr_data(DRAM_DQ),
