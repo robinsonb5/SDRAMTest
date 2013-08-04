@@ -31,7 +31,7 @@ LIBDIR   =
 
 # Commandline options for each tool.
 
-ZPUOPTS= -mno-poppcrel -mno-pushspadd -mno-callpcrel -mno-neg # No-neg requires bugfixed toolchain
+ZPUOPTS= -mno-poppcrel -mno-pushspadd -mno-callpcrel -mno-byteop -mno-neg # No-neg requires bugfixed toolchain
 
 CFLAGS  = -I. -I$(UTIL_DIR)/ -c -Os $(ZPUOPTS) -DPRINTF_HEX_ONLY -DDISABLE_UART_RX
 # -DDISABLE_UART_TX 

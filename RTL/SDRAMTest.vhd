@@ -222,7 +222,8 @@ end process;
 		IMPL_SHIFT => true,
 		IMPL_XOR => true,
 		REMAP_STACK => true,
-		EXECUTE_RAM => run_from_ram -- We can save some LEs by omitting Execute from RAM support
+		EXECUTE_RAM => run_from_ram, -- We can save some LEs by omitting Execute from RAM support
+		maxAddrBitBRAM => 11
 	)
 	port map (
 		clk                 => clk,
