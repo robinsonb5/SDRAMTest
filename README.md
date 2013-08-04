@@ -24,6 +24,29 @@ Theory of Operation
 
 The firmware runs entirely from Block RAM, leaving the SDRAM clear for
 testing.  The tests performed are as follows:
+
 *	First stage sanity check:
-	Writes 0x00000000, 0x55555555, 0xaaaaaaaa and 0xffffffff in turn to location 0
+	Writes 0x00000000, 0x55555555, 0xaaaaaaaa and 0xffffffff in turn to
+	location 0 then reads them back and makes sure the data matched.
+
+*	Byte check:
+	Writes longwords 0x55555555 and 0xaaaaaaaa to locations 0 and 12
+	then writes bytes 0xcc and 0x33 to locations 0 and 15, respectively.
+	Reads back the longwords and checks that they now read as
+	0xcc555555 and 0x55555533, respectively.
+
+*	Address check:
+	Writes a pattern to various locations in the SDRAM, then overwrites
+	just the first one with a different pattern.  It then checks that
+    the new pattern hasn't propagated to any of the other locations, which
+	will happen if the SDRAM is smaller than expected, being incorrectly
+	addressed by the SDRAM controller, or has a bad connection on an address
+	line.  As a bonus, if everything's working correctly this test detects
+	the SDRAM chip's size.
+
+*	LFSR check:
+	Uses a simple random number generator to generate a series of addresses
+	and values.  It writes a couple of hundred thousand such, then resets the
+	random number generator and compares against RAM contents.
+
 
