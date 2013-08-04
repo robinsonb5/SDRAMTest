@@ -83,7 +83,7 @@ link:
 zpuromgen: ../ZPUFlex/Firmware/zpuromgen.c
 	gcc -o zpuromgen ../ZPUFlex/Firmware/zpuromgen.c
 
-%.vhd: %.bin zpuromgen
+%_ROM.vhd: %.bin zpuromgen
 	sed 's/dualportram/$*_ROM/' >$*_ROM.vhd <$(RTL_DIR)/rom_prologue.vhd
 	./zpuromgen $*.bin >>$*_ROM.vhd
 	cat >>$*_ROM.vhd $(RTL_DIR)/rom_epilogue.vhd

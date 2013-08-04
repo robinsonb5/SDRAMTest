@@ -378,7 +378,7 @@ begin
 		
 		FILL5:
 		begin
-			readword=cpu_addr[2:1];
+			readword<=cpu_addr[2:1];
 			state<=WAITING;
 		end
 

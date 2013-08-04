@@ -129,20 +129,23 @@ int lfsrcheck(volatile int *base)
 			CYCLE_LFSR;
 			unsigned int x=lfsr&0xfffff;
 			unsigned int k=lfsr&0xfffff;
-			if(base[j]!=w)
+			unsigned int jr,kr;
+			jr=base[j];
+			kr=base[k];
+			if(jr!=w)
 			{
 				result=0;
 				printf("0x%d good reads, ",goodreads);
-				printf("Error at 0x%d, expected 0x%d, got 0x%d\n",j, w,base[j]);
+				printf("Error at 0x%d, expected 0x%d, got 0x%d\n",j, w,jr);
 				goodreads=0;
 			}
 			else
 				++goodreads;
-			if(base[k]!=x)
+			if(kr!=x)
 			{
 				result=0;
 				printf("0x%d good reads, ",goodreads);
-				printf("Error at 0x%d, expected 0x%d, got 0x%d\n",k, x,base[k]);
+				printf("Error at 0x%d, expected 0x%d, got 0x%d\n",k, x,kr);
 				goodreads=0;
 			}
 			else
@@ -237,7 +240,7 @@ int main(int argc, char **argv)
 		if(addresscheck(base,CACHESIZE))
 			printf("Address check passed.\n");
 		if(lfsrcheck(base))
-			printf("LFSR check passed.\n");
+			printf("LFSR check passed.\n\n");
 	}
 	return(0);
 }
