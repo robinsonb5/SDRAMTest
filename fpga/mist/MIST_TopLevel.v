@@ -55,7 +55,6 @@ PLL mypll
 defparam mySDRAMTest.sdram_rows = 13;
 defparam mySDRAMTest.sdram_cols = 9;
 defparam mySDRAMTest.sysclk_frequency = 1250;
-defparam mySDRAMTest.spi_maxspeed = 4;
 defparam mySDRAMTest.run_from_ram = "false";
 
 SDRAMTest mySDRAMTest

@@ -47,6 +47,7 @@ create_clock -name {clk_27} -period 37.037 -waveform { 0.000 0.500 } [get_ports 
 
 derive_pll_clocks 
 create_generated_clock -name sd1clk_pin -source [get_pins {mypll|altpll_component|auto_generated|pll1|clk[0]}] [get_ports {SDRAM_CLK}]
+create_generated_clock -name sysclk -source [get_pins {mypll|altpll_component|auto_generated|pll1|clk[1]}]
 
 #**************************************************************
 # Set Clock Latency
@@ -66,12 +67,25 @@ derive_clock_uncertainty;
 set_input_delay -clock sd1clk_pin -max 5.8 [get_ports SDRAM_DQ*]
 set_input_delay -clock sd1clk_pin -min 3.2 [get_ports SDRAM_DQ*]
 
+# Delays for async signals - not necessary, but might as well avoid
+# having unconstrained ports in the design
+set_input_delay -clock sysclk -min 0.0 [get_ports {UART_RX}]
+set_input_delay -clock sysclk -max 0.0 [get_ports {UART_RX}]
+
+
 #**************************************************************
 # Set Output Delay
 #**************************************************************
 
 set_output_delay -clock sd1clk_pin -max 1.5 [get_ports SDRAM_*]
 set_output_delay -clock sd1clk_pin -min -0.8 [get_ports SDRAM_*]
+set_output_delay -clock sd1clk_pin -max 0.5 [get_ports SDRAM_CLK]
+set_output_delay -clock sd1clk_pin -min 0.5 [get_ports SDRAM_CLK]
+
+# Delays for async signals - not necessary, but might as well avoid
+# having unconstrained ports in the design
+#set_output_delay -clock sysclk -min 0.0 [get_ports UART_TX]
+#set_output_delay -clock sysclk -max 0.0 [get_ports UART_TX]
 
 #**************************************************************
 # Set Clock Groups
@@ -83,7 +97,8 @@ set_output_delay -clock sd1clk_pin -min -0.8 [get_ports SDRAM_*]
 # Set False Path
 #**************************************************************
 
-
+# Asynchronous signal, so not important timing-wise
+set_false_path -from {SDRAMTest:mySDRAMTest|simple_uart:myuart|txd} -to {UART_TX}
 
 #**************************************************************
 # Set Multicycle Path
@@ -93,6 +108,8 @@ set_output_delay -clock sd1clk_pin -min -0.8 [get_ports SDRAM_*]
 #set_multicycle_path -from [get_clocks {mypll2|altpll_component|auto_generated|pll1|clk[0]}] -to [get_clocks {sd2clk_pin}] -setup -end 2
 
 set_multicycle_path -from [get_clocks {sd1clk_pin}] -to [get_clocks {mypll|altpll_component|auto_generated|pll1|clk[1]}] -setup -end 2
+set_multicycle_path -from {SDRAMTest:mySDRAMTest|SDRAMTest_ROM:myrom|altsyncram:ram_rtl_0|altsyncram_efs1:auto_generated|*} -to {SDRAMTest:mySDRAMTest|zpu_core:zpu|*} -hold -end 2
+set_multicycle_path -from {SDRAMTest:mySDRAMTest|SDRAMTest_ROM:myrom|altsyncram:ram_rtl_0|altsyncram_efs1:auto_generated|*} -to {SDRAMTest:mySDRAMTest|zpu_core:zpu|*} -setup -end 2
 
 #**************************************************************
 # Set Maximum Delay
