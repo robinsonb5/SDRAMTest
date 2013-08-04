@@ -197,7 +197,10 @@ PLL mypll
 
 defparam mySDRAMTest.sdram_rows = 12;
 defparam mySDRAMTest.sdram_cols = 8;
-defparam mySDRAMTest.sysclk_frequency = 1250;
+
+// TimeQuest says we can't go above 125MHz on the DE1
+defparam mySDRAMTest.sysclk_frequency = 1330;
+
 defparam mySDRAMTest.run_from_ram = "false";
 
 SDRAMTest mySDRAMTest

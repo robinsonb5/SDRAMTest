@@ -1,4 +1,3 @@
-#include "uart.h"
 
 #ifdef DEBUG
 #include <stdio.h>
@@ -6,11 +5,10 @@
 #include <malloc.h>
 #else
 #include "small_printf.h"
+#include "uart.h"
 #endif
 
-//#define CYCLE_LFSR {lfsr<<=1; if(lfsr&0x80000000) lfsr|=1; if(lfsr&0x10000000) lfsr^=1;}
-
-//#define CYCLE_LFSR {lfsr<<=1; if(lfsr&0x80000000) lfsr|=1; if(lfsr&0x10000000) lfsr^=1;}
+// FIXME - use a smaller LFSR - this one will fail for RAMs smaller than 8 meg.
 #define CYCLE_LFSR {lfsr<<=1; if(lfsr&0x400000) lfsr|=1; if(lfsr&0x200000) lfsr^=1;}
 
 // Force a read-read of cache contents.  Takes the size of the cache (in bytes) as a parameter.
@@ -97,28 +95,32 @@ int bytecheck(volatile int *base,int cachesize)
 
 #define LFSRSEED 12467
 
-int lfsrcheck(volatile int *base)
+int lfsrcheck(volatile int *base,unsigned int size)
 {
 	int result;
-	int cycles=15;
+	int cycles=127;
 	int goodreads=0;
+	// Shift left 20 bits to convert to megabytes, then 2 bits right since we're dealing with longwords
+	unsigned int mask=(size<<18)-1;
 
-	printf("Checking memory...\n");
+	printf("Checking memory");
 
 	unsigned int lfsr=LFSRSEED;
 	while(--cycles)
 	{
 		int i;
-		unsigned int lfsrtemp=lfsr;
+		unsigned int lfsrtemp;
+		unsigned int addrmask;
+		putchar('.');
+		CYCLE_LFSR;
+		addrmask|=lfsr;
+		addrmask&=mask;
+		lfsrtemp=lfsr;
 		for(i=0;i<262144;++i)
 		{
 			unsigned int w=lfsr&0xfffff;
 			unsigned int j=lfsr&0xfffff;
-			CYCLE_LFSR;
-			unsigned int x=lfsr&0xfffff;
-			unsigned int k=lfsr&0xfffff;
-			base[j]=w;
-			base[k]=x;
+			base[j^addrmask]=w;
 			CYCLE_LFSR;
 		}
 		lfsr=lfsrtemp;
@@ -126,12 +128,8 @@ int lfsrcheck(volatile int *base)
 		{
 			unsigned int w=lfsr&0xfffff;
 			unsigned int j=lfsr&0xfffff;
-			CYCLE_LFSR;
-			unsigned int x=lfsr&0xfffff;
-			unsigned int k=lfsr&0xfffff;
-			unsigned int jr,kr;
-			jr=base[j];
-			kr=base[k];
+			unsigned int jr;
+			jr=base[j^addrmask];
 			if(jr!=w)
 			{
 				result=0;
@@ -141,18 +139,10 @@ int lfsrcheck(volatile int *base)
 			}
 			else
 				++goodreads;
-			if(kr!=x)
-			{
-				result=0;
-				printf("0x%d good reads, ",goodreads);
-				printf("Error at 0x%d, expected 0x%d, got 0x%d\n",k, x,kr);
-				goodreads=0;
-			}
-			else
-				++goodreads;
 			CYCLE_LFSR;
 		}
 	}
+	putchar('\n');
 	return(result);
 }
 
@@ -162,13 +152,13 @@ int lfsrcheck(volatile int *base)
 #define ADDRCHECKWORD 0x55aa44bb
 #define ADDRCHECKWORD2 0xf0e1d2c3
 
-int addresscheck(volatile int *base,int cachesize)
+unsigned int addresscheck(volatile int *base,int cachesize)
 {
 	int result=1;
 	int i,j,k;
 	int a1,a2;
 	int aliases=0;
-	int size=64;
+	unsigned int size=64;
 	// Seed the RAM;
 	a1=1;
 	*base=ADDRCHECKWORD;
@@ -203,20 +193,24 @@ int addresscheck(volatile int *base,int cachesize)
 	}
 	aliases<<=2;
 	if(aliases)
+	{
 		printf("Aliases found at 0x%d\n",aliases);
 
-	while(aliases)
-	{
-		if((aliases&0x2000000)==0)	// If the alias bits aren't contiguously the high bits, then it indicates a bad address.
-			result=0;
-		aliases=(aliases<<1)&0x3ffffff;	// Test currently supports up to 16m longwords = 64 megabytes.
-		size>>=1;
+		while(aliases)
+		{
+			if((aliases&0x2000000)==0)	// If the alias bits aren't contiguously the high bits, then it indicates a bad address.
+				result=0;
+			aliases=(aliases<<1)&0x3ffffff;	// Test currently supports up to 16m longwords = 64 megabytes.
+			size>>=1;
+		}
+		if(result && (size<64))
+			printf("(Aliases probably simply indicate that RAM\nis smaller than 64 megabytes)\n");
+		else
+			size=1;
 	}
-	if(result && (size<64))
-		printf("(Aliases probably simply indicate that RAM\nis smaller than 64 megabytes)\n");
 	printf("SDRAM size (assuming no address faults) is 0x%d megabytes\n",size);
 	
-	return(result);
+	return(size);
 }
 
 
@@ -233,13 +227,14 @@ int main(int argc, char **argv)
 
 	while(1)
 	{
+		int size;
 		if(sanitycheck(base,CACHESIZE))
 			printf("First stage sanity check passed.\n");
 		if(bytecheck(base,CACHESIZE))
 			printf("Byte (dqm) check passed\n");
-		if(addresscheck(base,CACHESIZE))
+		if(size=addresscheck(base,CACHESIZE))
 			printf("Address check passed.\n");
-		if(lfsrcheck(base))
+		if(lfsrcheck(base,size))
 			printf("LFSR check passed.\n\n");
 	}
 	return(0);

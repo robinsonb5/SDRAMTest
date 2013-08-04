@@ -35,6 +35,9 @@ end entity;
 
 architecture rtl of SDRAMTest is
 
+constant sysclk_hz : integer := sysclk_frequency*1000;
+constant uart_divisor : integer := sysclk_hz/1152;
+
 signal reset : std_logic := '0';
 signal reset_counter : unsigned(15 downto 0) := X"FFFF";
 
@@ -179,7 +182,7 @@ end process;
 			rxdata => ser_rxdata,
 			rxint => ser_rxint,
 			txint => open,
-			clock_divisor => ser_clock_divisor,
+			clock_divisor => to_unsigned(uart_divisor,16), -- Hardcode to 115200 - was ser_clock_divisor,
 			rxd => rxd,
 			txd => txd
 		);
@@ -259,9 +262,9 @@ begin
 									ser_txgo<='1';
 									mem_busy<='0';
 
-								when X"88" => -- UART Clock divisor
-									ser_clock_divisor<=unsigned(mem_write(15 downto 0));
-									mem_busy<='0';
+--								when X"88" => -- UART Clock divisor
+--									ser_clock_divisor<=unsigned(mem_write(15 downto 0));
+--									mem_busy<='0';
 									
 								when others =>
 									mem_busy<='0'; -- FIXME - shouldn't need this
@@ -289,9 +292,9 @@ begin
 									ser_rxrecv<='0';	-- Clear rx flag.
 									mem_busy<='0';
 									
-								when X"C0" => -- Millisecond counter
-									mem_read<=std_logic_vector(millisecond_counter);
-									mem_busy<='0';
+--								when X"C0" => -- Millisecond counter
+--									mem_read<=std_logic_vector(millisecond_counter);
+--									mem_busy<='0';
 
 								when others =>
 									mem_busy<='0'; -- FIXME - shouldn't need this

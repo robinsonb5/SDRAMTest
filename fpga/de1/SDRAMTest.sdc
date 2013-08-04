@@ -69,8 +69,8 @@ set_input_delay -clock sd1clk_pin -min 3.2 [get_ports DRAM_DQ*]
 
 # Delays for async signals - not necessary, but might as well avoid
 # having unconstrained ports in the design
-set_input_delay -clock sysclk -min 0.0 [get_ports {KEY* SW* UART_RXD}]
-set_input_delay -clock sysclk -max 0.0 [get_ports {KEY* SW* UART_RXD}]
+set_input_delay -clock sysclk -min 0.0 [get_ports {UART_RXD}]
+set_input_delay -clock sysclk -max 0.0 [get_ports {UART_RXD}]
 
 
 #**************************************************************
@@ -98,6 +98,8 @@ set_output_delay -clock sysclk -max 0.5 [get_ports UART_TXD]
 # Set False Path
 #**************************************************************
 
+set_false_path -from {KEY*} -to {reset}
+set_false_path -from {SW*} -to {reset}
 
 
 #**************************************************************
