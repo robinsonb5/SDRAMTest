@@ -191,7 +191,7 @@ end process;
 
 	myrom : entity work.SDRAMTest_ROM
 	generic map (
-		maxAddrBit => 11
+		maxAddrBitBRAM => 11
 	)
 	port map (
 		clk => clk,
